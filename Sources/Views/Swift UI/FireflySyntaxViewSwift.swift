@@ -25,7 +25,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
 
     var didChangeText: (FireflySyntaxEditor) -> Void
     var didChangeSelectedRange: (FireflySyntaxEditor, NSRange) -> Void
-    var textViewDidBeginEditing: (FireflySyntaxEditor) -> Void
+    var textViewDidBeginEditing: (FireflyTextView) -> Void
+    var textViewDidEndEditing: (FireflyTextView) -> Void
 
     public init(
         text: Binding<String>,
@@ -36,7 +37,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         fontName: String,
         didChangeText: @escaping (FireflySyntaxEditor) -> Void,
         didChangeSelectedRange: @escaping (FireflySyntaxEditor, NSRange) -> Void,
-        textViewDidBeginEditing: @escaping (FireflySyntaxEditor) -> Void
+        textViewDidBeginEditing: @escaping (FireflyTextView) -> Void,
+        textViewDidEndEditing: @escaping (FireflyTextView) -> Void
     ) {
         self._text = text
         self.cursorPosition = cursorPosition
@@ -44,6 +46,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         self.didChangeText = didChangeText
         self.didChangeSelectedRange = didChangeSelectedRange
         self.textViewDidBeginEditing = textViewDidBeginEditing
+        self.textViewDidEndEditing = textViewDidEndEditing
         self.language = language
         self.theme = theme
         self.fontName = fontName
@@ -51,17 +54,26 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> FireflySyntaxView {
         let wrappedView = FireflySyntaxView()
-        wrappedView.delegate = context.coordinator        
+        wrappedView.delegate = context.coordinator
         context.coordinator.wrappedView = wrappedView
         context.coordinator.wrappedView.text = text
         context.coordinator.wrappedView.setFont(font: fontName)
         context.coordinator.wrappedView.setTheme(name: theme)
         context.coordinator.wrappedView.setLanguage(nLanguage: language)
-
         return wrappedView
     }
 
-    public func updateUIView(_ uiView: FireflySyntaxView, context: Context) {}
+    public func updateUIView(_ uiView: FireflySyntaxView, context: Context) {
+        if context.coordinator.wrappedView.fontName != fontName {
+            context.coordinator.wrappedView.setFont(font: fontName)
+        }
+        if context.coordinator.wrappedView.fontName != theme {
+            context.coordinator.wrappedView.setTheme(name: theme)
+        }
+        if context.coordinator.wrappedView.fontName != language {
+            context.coordinator.wrappedView.setLanguage(nLanguage: language)
+        }
+    }
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -103,8 +115,12 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             parent.didChangeSelectedRange(parent, selectedRange)
         }
         
-        public func textViewDidBeginEditing(_ syntaxTextView: FireflyTextView) {
-            parent.textViewDidBeginEditing(parent)
+        public func textViewDidBeginEditing(_ textView: FireflyTextView) {
+            parent.textViewDidBeginEditing(textView)
+        }
+        
+        public func textViewDidEndEditing(_ textView: FireflyTextView) {
+            parent.textViewDidEndEditing(textView)
         }
     }
 }

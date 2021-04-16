@@ -23,6 +23,8 @@ public protocol FireflyDelegate: AnyObject {
 
     func textViewDidBeginEditing(_ syntaxTextView: FireflyTextView)
     
+    func textViewDidEndEditing(_ textView: FireflyTextView)
+    
     func didClickLink(_ link: String)
 
 }
@@ -38,6 +40,8 @@ public extension FireflyDelegate {
     func didChangeSelectedRange(_ syntaxTextView: FireflyTextView, selectedRange: NSRange) { }
 
     func textViewDidBeginEditing(_ syntaxTextView: FireflyTextView) { }
+    
+    func textViewDidEndEditing(_ textView: FireflyTextView) {}
     
     func didClickLink(_ link: String) { }
 }

@@ -187,6 +187,16 @@ extension FireflySyntaxView: UITextViewDelegate {
         updateCursorPosition()
 //        textStorage.updatePlaceholders(cursorRange: textView.selectedRange)
     }
+    
+    public func textViewDidBeginEditing(_ textView: UITextView) {
+        guard let tView = textView as? FireflyTextView  else { return }
+        delegate?.textViewDidBeginEditing(tView)
+    }
+    
+    public func textViewDidEndEditing(_ textView: UITextView) {
+        guard let tView = textView as? FireflyTextView  else { return }
+        delegate?.textViewDidEndEditing(tView)
+    }
 
     func updateSelectedRange(_ range: NSRange) {
         if range.location + range.length <= text.utf8.count {

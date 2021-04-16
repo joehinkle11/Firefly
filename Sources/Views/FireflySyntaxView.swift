@@ -144,7 +144,10 @@ public class FireflySyntaxView: UIView {
         layoutManager.addTextContainer(textContainer)
         let tFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
         textView = FireflyTextView(frame: tFrame, textContainer: textContainer)
+        textView.keyboardDismissMode = .interactive
         textView.isScrollEnabled = true
+        textView.isUserInteractionEnabled = true
+        textView.alwaysBounceVertical = true
         textView.text = ""
         
         self.addSubview(textView)

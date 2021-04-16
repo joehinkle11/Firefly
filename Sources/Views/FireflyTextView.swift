@@ -13,7 +13,6 @@ public class FireflyTextView: UITextView {
             textContainerInset = UIEdgeInsets(top: 0, left: gutterWidth, bottom: 0, right: 0)
         }
     }
-    
     /// Returns a CGRect for the cursor position in the text view's coordinates. If no cursor is present, it returns nil.
     /// source: https://stackoverflow.com/a/43167060/3902590
     public func cursorPosition() -> CGRect? {
