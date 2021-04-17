@@ -25,10 +25,5 @@ let package = Package(
             name: "Firefly",
             dependencies: [],
             path: "Sources"),
-        .testTarget(
-            name: "FireflyTests",
-            dependencies: ["Firefly"],
-            path: "Tests"),
-
     ]
 )

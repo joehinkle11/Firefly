@@ -12,10 +12,14 @@ import UIKit
 public protocol FireflyDelegate: AnyObject {
     var cursorPositionChange: ((_ cursorPosition: CGRect?) -> Void)? { get }
     
+    var onSelectedTextRange: ((UITextRange?) -> Void)? { get }
+    
     var implementUIKeyCommands: (
         keyCommands: (_ selector: Selector) -> [UIKeyCommand]?,
         receiver: (_ sender: UIKeyCommand) -> Void
     )? { get }
+    
+    var handleReturnKey: (() -> Bool)? { get }
 
     func didChangeText(_ syntaxTextView: FireflyTextView)
 
@@ -33,7 +37,11 @@ public protocol FireflyDelegate: AnyObject {
 public extension FireflyDelegate {
     var cursorPositionChange: ((_ cursorPosition: CGRect?) -> Void)? { nil }
     
+    var onSelectedTextRange: ((UITextRange?) -> Void)? { nil }
+    
     var implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)? { nil }
+    
+    var handleReturnKey: (() -> Bool)? { nil }
     
     func didChangeText(_ syntaxTextView: FireflyTextView) { }
 

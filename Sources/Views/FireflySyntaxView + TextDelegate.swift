@@ -17,6 +17,13 @@ extension FireflySyntaxView: UITextViewDelegate {
         let selectedRange = textView.selectedRange
         var insertingText = text
         
+        if text == "\n", let handleReturnKeyFunction = delegate?.handleReturnKey {
+            // if handleReturnKey returns true, it means they will handle the event
+            if handleReturnKeyFunction() {
+                return false
+            }
+        }
+        
         if placeholdersAllowed {
             //There is a bug here that when a multi-line string that is larger than the visible area is present, it will be partially highlighted because the ranges get messed up.
             let inside = textStorage.insidePlaceholder(cursorRange: selectedRange)
@@ -181,6 +188,13 @@ extension FireflySyntaxView: UITextViewDelegate {
                 cursorPositionChange(nil)
             }
         }
+        if let onSelectedTextRange = self.delegate?.onSelectedTextRange {
+            onSelectedTextRange(self.textView.selectedTextRange)
+        }
+    }
+    
+    public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        return false
     }
     
     public func textViewDidChangeSelection(_ textView: UITextView) {

@@ -18,6 +18,11 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     
     let cursorPosition: Binding<CGRect?>?
     let implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)?
+    let getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)?
+    let selectedTextRange: Binding<UITextRange?>?
+    
+    let returnKeyType: UIReturnKeyType?
+    let handleReturnKey: (() -> Bool)?
     
     var language: String
     var theme: String
@@ -32,6 +37,12 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         text: Binding<String>,
         cursorPosition: Binding<CGRect?>? = nil,
         implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)? = nil,
+        getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)? = nil,
+        selectedTextRange: Binding<UITextRange?>? = nil,
+        
+        returnKeyType: UIReturnKeyType? = nil,
+        handleReturnKey: (() -> Bool)? = nil,
+        
         language: String,
         theme: String,
         fontName: String,
@@ -41,15 +52,23 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         textViewDidEndEditing: @escaping (FireflyTextView) -> Void
     ) {
         self._text = text
+        
         self.cursorPosition = cursorPosition
         self.implementUIKeyCommands = implementUIKeyCommands
+        self.getMoveCursorFunction = getMoveCursorFunction
+        self.selectedTextRange = selectedTextRange
+        
+        self.returnKeyType = returnKeyType
+        self.handleReturnKey = handleReturnKey
+        
+        self.language = language
+        self.theme = theme
+        self.fontName = fontName
+        
         self.didChangeText = didChangeText
         self.didChangeSelectedRange = didChangeSelectedRange
         self.textViewDidBeginEditing = textViewDidBeginEditing
         self.textViewDidEndEditing = textViewDidEndEditing
-        self.language = language
-        self.theme = theme
-        self.fontName = fontName
     }
 
     public func makeUIView(context: Context) -> FireflySyntaxView {
@@ -60,6 +79,12 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         context.coordinator.wrappedView.setFont(font: fontName)
         context.coordinator.wrappedView.setTheme(name: theme)
         context.coordinator.wrappedView.setLanguage(nLanguage: language)
+        if let returnKeyType = returnKeyType {
+            context.coordinator.wrappedView.textView.returnKeyType = returnKeyType
+        }
+        if let getMoveCursorFunction = getMoveCursorFunction {
+            getMoveCursorFunction(context.coordinator.wrappedView.textView.moveCursor(change:))
+        }
         return wrappedView
     }
 
@@ -67,11 +92,15 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         if context.coordinator.wrappedView.fontName != fontName {
             context.coordinator.wrappedView.setFont(font: fontName)
         }
-        if context.coordinator.wrappedView.fontName != theme {
+        if context.coordinator.wrappedView.theme != theme {
             context.coordinator.wrappedView.setTheme(name: theme)
         }
-        if context.coordinator.wrappedView.fontName != language {
+        if context.coordinator.wrappedView.language != language {
             context.coordinator.wrappedView.setLanguage(nLanguage: language)
+        }
+        if let returnKeyType = returnKeyType, returnKeyType != context.coordinator.wrappedView.textView.returnKeyType {
+            context.coordinator.wrappedView.textView.returnKeyType = returnKeyType
+            context.coordinator.wrappedView.textView.reloadInputViews()
         }
     }
     
@@ -88,6 +117,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         )?
         
         public func didClickLink(_ link: URL) { }
+        public var handleReturnKey: (() -> Bool)?
+        public var onSelectedTextRange: ((UITextRange?) -> Void)?
         
         let parent: FireflySyntaxEditor
         var wrappedView: FireflySyntaxView!
@@ -101,6 +132,14 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             }
             if let implementUIKeyCommands = parent.implementUIKeyCommands {
                 self.implementUIKeyCommands = implementUIKeyCommands
+            }
+            if let handleReturnKey = parent.handleReturnKey {
+                self.handleReturnKey = handleReturnKey
+            }
+            if let selectedTextRange = parent.selectedTextRange {
+                self.onSelectedTextRange = {
+                    selectedTextRange.wrappedValue = $0
+                }
             }
         }
         
