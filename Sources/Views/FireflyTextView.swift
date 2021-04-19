@@ -10,9 +10,10 @@ import UIKit
 public class FireflyTextView: UITextView {
     var gutterWidth: CGFloat = 20 {
         didSet {
-            textContainerInset = UIEdgeInsets(top: 0, left: gutterWidth, bottom: 0, right: 0)
+            textContainerInset.left = gutterWidth
         }
     }
+    
     /// Returns a CGRect for the cursor position in the text view's coordinates. If no cursor is present, it returns nil.
     /// source: https://stackoverflow.com/a/43167060/3902590
     public func cursorPosition() -> CGRect? {
@@ -124,7 +125,7 @@ public class FireflyTextView: UITextView {
         while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
             if (text == " " || text == "\t" || text == "\n") && !hasSeenNonWhitespace {
                 
-            } else if !CharacterSet.alphanumerics.contains(scalar) {
+            } else if !CharacterSet.alphanumerics.contains(scalar) || text.contains("_") {
                 wordStartPosition = range.end
                 break
             } else {
@@ -140,7 +141,7 @@ public class FireflyTextView: UITextView {
         while let range = getRange(from: position, offset: 1), let text = self.text(in: range), let scalar = text.unicodeScalars.last {
             if (text == " " || text == "\t" || text == "\n") && !hasSeenNonWhitespace {
                 
-            } else if !CharacterSet.alphanumerics.contains(scalar) {
+            } else if !CharacterSet.alphanumerics.contains(scalar) || text.contains("_") {
                 if let pos = self.position(from: range.end, offset: -1) {
                     wordEndPosition = pos
                 }
@@ -224,6 +225,13 @@ public class FireflyTextView: UITextView {
     
     public func currentWord() -> String {
         guard let wordRange = currentWordRange() else { return "" }
+        
+        return self.text(in: wordRange) ?? ""
+    }
+    
+    public func currentWord2() -> String {
+        guard let start = self.selectedTextRange?.start else { return "" }
+        guard let wordRange = currentWordRange2(from: start) else { return "" }
         
         return self.text(in: wordRange) ?? ""
     }

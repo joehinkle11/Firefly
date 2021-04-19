@@ -193,13 +193,15 @@ extension FireflySyntaxView: UITextViewDelegate {
         }
     }
     
-    public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        return false
-    }
-    
     public func textViewDidChangeSelection(_ textView: UITextView) {
         updateCursorPosition()
-//        textStorage.updatePlaceholders(cursorRange: textView.selectedRange)
+        if let didChangeSelectedRange = delegate?.didChangeSelectedRange {
+            guard let tView = textView as? FireflyTextView  else { return }
+            didChangeSelectedRange(tView, self.textView.selectedRange)
+        }
+        if let onCurrentWord = delegate?.onCurrentWord {
+            onCurrentWord(self.textView.currentWord2())
+        }
     }
     
     public func textViewDidBeginEditing(_ textView: UITextView) {

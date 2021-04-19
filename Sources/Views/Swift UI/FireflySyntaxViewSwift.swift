@@ -19,6 +19,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     let cursorPosition: Binding<CGRect?>?
     let implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)?
     let getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)?
+    
+    let currentWord: Binding<String?>?
     let selectedTextRange: Binding<UITextRange?>?
     
     let returnKeyType: UIReturnKeyType?
@@ -38,7 +40,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         cursorPosition: Binding<CGRect?>? = nil,
         implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)? = nil,
         getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)? = nil,
+        
         selectedTextRange: Binding<UITextRange?>? = nil,
+        currentWord: Binding<String?>? = nil,
         
         returnKeyType: UIReturnKeyType? = nil,
         handleReturnKey: (() -> Bool)? = nil,
@@ -56,7 +60,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         self.cursorPosition = cursorPosition
         self.implementUIKeyCommands = implementUIKeyCommands
         self.getMoveCursorFunction = getMoveCursorFunction
+        
         self.selectedTextRange = selectedTextRange
+        self.currentWord = currentWord
         
         self.returnKeyType = returnKeyType
         self.handleReturnKey = handleReturnKey
@@ -75,6 +81,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         let wrappedView = FireflySyntaxView()
         wrappedView.delegate = context.coordinator
         context.coordinator.wrappedView = wrappedView
+        context.coordinator.wrappedView.allowOverscrollingOnBottom()
         context.coordinator.wrappedView.text = text
         context.coordinator.wrappedView.setFont(font: fontName)
         context.coordinator.wrappedView.setTheme(name: theme)
@@ -119,6 +126,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         public func didClickLink(_ link: URL) { }
         public var handleReturnKey: (() -> Bool)?
         public var onSelectedTextRange: ((UITextRange?) -> Void)?
+        public var onCurrentWord: ((String?) -> Void)?
         
         let parent: FireflySyntaxEditor
         var wrappedView: FireflySyntaxView!
@@ -139,6 +147,11 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             if let selectedTextRange = parent.selectedTextRange {
                 self.onSelectedTextRange = {
                     selectedTextRange.wrappedValue = $0
+                }
+            }
+            if let currentWord = parent.currentWord {
+                self.onCurrentWord = {
+                    currentWord.wrappedValue = $0
                 }
             }
         }

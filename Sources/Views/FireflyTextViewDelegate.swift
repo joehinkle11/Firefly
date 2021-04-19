@@ -14,6 +14,8 @@ public protocol FireflyDelegate: AnyObject {
     
     var onSelectedTextRange: ((UITextRange?) -> Void)? { get }
     
+    var onCurrentWord: ((String?) -> Void)? { get }
+    
     var implementUIKeyCommands: (
         keyCommands: (_ selector: Selector) -> [UIKeyCommand]?,
         receiver: (_ sender: UIKeyCommand) -> Void
@@ -38,6 +40,8 @@ public extension FireflyDelegate {
     var cursorPositionChange: ((_ cursorPosition: CGRect?) -> Void)? { nil }
     
     var onSelectedTextRange: ((UITextRange?) -> Void)? { nil }
+    
+    var onCurrentWord: ((String?) -> Void)? { nil }
     
     var implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)? { nil }
     

@@ -20,6 +20,9 @@ public class FireflySyntaxView: UIView {
     @IBInspectable
     internal var fontName: String = "system"
     
+    /// Allows the scrollview to be moved past the bottom
+    internal var allowOverscrolling: Bool = false
+    
     /// If set, sets the text views text to the given text. If gotten gets the text views text.
     @IBInspectable
     public var text: String {
@@ -230,7 +233,20 @@ public class FireflySyntaxView: UIView {
         }
     }
     
-   /// Returns the current theme so you can get colors from that
+    /// allows the scroll area to be moved halfway up
+    public func allowOverscrollingOnBottom() {
+        allowOverscrolling = true
+    }
+    
+    /// helps update the inset for the allowOverscrolling setting
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        if allowOverscrolling {
+            textView.textContainerInset.bottom = self.bounds.height * 0.5
+        }
+    }
+    
+    /// Returns the current theme so you can get colors from that
     public func getCurrentTheme() -> Theme {
         return textStorage.syntax.theme
     }
@@ -341,7 +357,7 @@ public class FireflySyntaxView: UIView {
         updateAppearence()
     }
     
-    /// Sets the gutter width.
+    /// Sets the keyboard offset.
     public func setShouldOffsetKeyboard(bool: Bool) {
         self.shouldOffsetKeyboard = bool
         setupNotifs()
