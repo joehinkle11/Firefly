@@ -36,6 +36,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     var fontName: String
 
     var didChangeText: (FireflyTextView) -> Void
+    
+    let onNewText: ((_ previous10Characters: String, _ newText: String) -> Void)?
+    
     var didChangeSelectedRange: (FireflySyntaxEditor, NSRange) -> Void
     var textViewDidBeginEditing: (FireflyTextView) -> Void
     var textViewDidEndEditing: (FireflyTextView) -> Void
@@ -64,6 +67,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         theme: String,
         fontName: String,
         didChangeText: @escaping (FireflyTextView) -> Void,
+        
+        onNewText: ((_ previous10Characters: String, _ newText: String) -> Void)? = nil,
+        
         didChangeSelectedRange: @escaping (FireflySyntaxEditor, NSRange) -> Void,
         textViewDidBeginEditing: @escaping (FireflyTextView) -> Void,
         textViewDidEndEditing: @escaping (FireflyTextView) -> Void,
@@ -93,6 +99,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         self.fontName = fontName
         
         self.didChangeText = didChangeText
+        
+        self.onNewText = onNewText
+        
         self.didChangeSelectedRange = didChangeSelectedRange
         self.textViewDidBeginEditing = textViewDidBeginEditing
         self.textViewDidEndEditing = textViewDidEndEditing
@@ -127,6 +136,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
                 context.coordinator.wrappedView.forceHighlight()
             })
         }
+        context.coordinator.wrappedView.onNewText = onNewText
         return wrappedView
     }
 

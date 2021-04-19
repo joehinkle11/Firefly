@@ -8,9 +8,15 @@
 import UIKit
 
 extension FireflySyntaxView: UITextViewDelegate {
-    
+        
     //MARK: UITextViewDelegate
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if let textRange = NSRange(location: max(0, range.location - 10), length: 10).toTextRange(textInput: textView),
+           let previews10Characters = textView.text(in: textRange) {
+            onNewText?(previews10Characters, text)
+        } else {
+            onNewText?("", text)
+        }
         let vRange = getVisibleRange()
         if vRange.encompasses(r2: range) { shouldHighlightOnChange = true } else { highlightAll = true }
         
@@ -272,5 +278,15 @@ extension FireflySyntaxView: UITextViewDelegate {
     
     @objc func handleUIKeyCommand(sender: UIKeyCommand) {
         delegate?.implementUIKeyCommands?.receiver(sender)
+    }
+}
+
+extension NSRange {
+    func toTextRange(textInput:UITextInput) -> UITextRange? {
+        if let rangeStart = textInput.position(from: textInput.beginningOfDocument, offset: location),
+            let rangeEnd = textInput.position(from: rangeStart, offset: length) {
+            return textInput.textRange(from: rangeStart, to: rangeEnd)
+        }
+        return nil
     }
 }

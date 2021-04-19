@@ -467,4 +467,6 @@ public class FireflySyntaxView: UIView {
             }
         }
     }
+    
+    var onNewText: ((_ previous10Characters: String, _ newText: String) -> Void)?
 }
