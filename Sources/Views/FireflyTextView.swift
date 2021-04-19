@@ -69,8 +69,8 @@ public class FireflyTextView: UITextView {
             } else if let currentSelectedRange = self.selectedTextRange, let currentWordRange = self.currentWordRange2(from: directionGoingRight ? currentSelectedRange.end : currentSelectedRange.start) {
                 // by word
                 var newLocation = currentWordRange.start
-                if directionGoingRight {
-                    if currentWordRange.end == currentSelectedRange.end {
+                if x > 0 {
+                    if currentWordRange.end == (directionGoingRight ? currentSelectedRange.end : currentSelectedRange.start) {
                         guard let loc = self.position(from: currentSelectedRange.end, offset: x) else {
                             return nil
                         }
@@ -79,7 +79,7 @@ public class FireflyTextView: UITextView {
                         newLocation = currentWordRange.end
                     }
                 } else {
-                    if currentWordRange.start == currentSelectedRange.start {
+                    if currentWordRange.start == (directionGoingRight ? currentSelectedRange.end : currentSelectedRange.start) {
                         guard let loc = self.position(from: currentSelectedRange.start, offset: x) else {
                             return nil
                         }
@@ -118,9 +118,21 @@ public class FireflyTextView: UITextView {
                 return
             }
             if change.directionGoingRight {
-                self.selectedTextRange = self.textRange(from: currentPos.start, to: nextRange.end)
+                let currentPosStartInt = self.offset(from: self.beginningOfDocument, to: currentPos.start)
+                let nextRangeEndInt = self.offset(from: self.beginningOfDocument, to: nextRange.end)
+                if nextRangeEndInt < currentPosStartInt {
+                    self.selectedTextRange = self.textRange(from: currentPos.start, to: currentPos.start)
+                } else {
+                    self.selectedTextRange = self.textRange(from: currentPos.start, to: nextRange.end)
+                }
             } else {
-                self.selectedTextRange = self.textRange(from: nextRange.start, to: currentPos.end)
+                let currentPosEndInt = self.offset(from: self.beginningOfDocument, to: currentPos.end)
+                let nextRangeStartInt = self.offset(from: self.beginningOfDocument, to: nextRange.start)
+                if nextRangeStartInt > currentPosEndInt {
+                    self.selectedTextRange = self.textRange(from: currentPos.end, to: currentPos.end)
+                } else {
+                    self.selectedTextRange = self.textRange(from: nextRange.start, to: currentPos.end)
+                }
             }
         } else {
             self.selectedTextRange = nextRange
@@ -143,7 +155,7 @@ public class FireflyTextView: UITextView {
         while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
             if (text == " " || text == "\t" || text == "\n") && !hasSeenNonWhitespace {
                 
-            } else if !CharacterSet.alphanumerics.contains(scalar) || text.contains("_") {
+            } else if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") {
                 wordStartPosition = range.end
                 break
             } else {
@@ -159,7 +171,7 @@ public class FireflyTextView: UITextView {
         while let range = getRange(from: position, offset: 1), let text = self.text(in: range), let scalar = text.unicodeScalars.last {
             if (text == " " || text == "\t" || text == "\n") && !hasSeenNonWhitespace {
                 
-            } else if !CharacterSet.alphanumerics.contains(scalar) || text.contains("_") {
+            } else if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") {
                 if let pos = self.position(from: range.end, offset: -1) {
                     wordEndPosition = pos
                 }
