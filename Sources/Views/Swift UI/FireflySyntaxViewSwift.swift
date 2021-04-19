@@ -25,7 +25,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     
     let isUsingHardKeyboard: Binding<Bool>?
     
-    let currentWord: Binding<(UITextRange, String)?>?
+    let currentWord: Binding<(range: UITextRange, currentWordText: String, leadingText: [String])?>?
     let selectedTextRange: Binding<UITextRange?>?
     
     let returnKeyType: UIReturnKeyType?
@@ -58,7 +58,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         isUsingHardKeyboard: Binding<Bool>? = nil,
         
         selectedTextRange: Binding<UITextRange?>? = nil,
-        currentWord: Binding<(UITextRange, String)?>? = nil,
+        currentWord: Binding<(range: UITextRange, currentWordText: String, leadingText: [String])?>? = nil,
         
         returnKeyType: UIReturnKeyType? = nil,
         handleReturnKey: (() -> Bool)? = nil,
@@ -176,7 +176,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         public func didClickLink(_ link: URL) { }
         public var handleReturnKey: (() -> Bool)?
         public var onSelectedTextRange: ((UITextRange?) -> Void)?
-        public var onCurrentWord: (((UITextRange, String)?) -> Void)?
+        public var onCurrentWord: (((range: UITextRange, currentWordText: String, leadingText: [String])?) -> Void)?
         
         public var onHardKeyboardUseChange: ((_ isUsingHardKeyboard: Bool) -> Void)?
         

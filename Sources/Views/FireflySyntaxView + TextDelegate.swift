@@ -219,7 +219,7 @@ extension FireflySyntaxView: UITextViewDelegate {
             }
         }
         if let onCurrentWord = delegate?.onCurrentWord {
-            onCurrentWord(self.textView.currentWord2())
+            onCurrentWord(self.textView.currentWord3())
         }
     }
     

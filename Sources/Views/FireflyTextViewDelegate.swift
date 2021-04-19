@@ -16,7 +16,7 @@ public protocol FireflyDelegate: AnyObject {
     
     var onSelectedTextRange: ((UITextRange?) -> Void)? { get }
     
-    var onCurrentWord: (((UITextRange, String)?) -> Void)? { get }
+    var onCurrentWord: (((range: UITextRange, currentWordText: String, leadingText: [String])?) -> Void)? { get }
     
     var implementUIKeyCommands: (
         keyCommands: (_ selector: Selector) -> [UIKeyCommand]?,

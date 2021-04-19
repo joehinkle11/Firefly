@@ -259,9 +259,116 @@ public class FireflyTextView: UITextView {
         return self.text(in: wordRange) ?? ""
     }
     
-    public func currentWord2() -> (UITextRange, String)? {
+    public func currentWord3() -> (range: UITextRange, currentWordText: String, leadingText: [String])? {
         guard let start = self.selectedTextRange?.start else { return nil }
-        guard let wordRange = currentWordRange2(from: start) else { return nil }
-        return (wordRange, text(in: wordRange) ?? "")
+        guard let wordRange = currentWordRange3(from: start) else { return nil }
+        let leadingText = self.leadingText(from: wordRange.start)
+        return (range: wordRange, currentWordText: text(in: wordRange) ?? "", leadingText: leadingText ?? [])
+    }
+    
+    public func currentWordRange3(from pos: UITextPosition) -> UITextRange? {
+        var position = pos
+        func getRange(from position: UITextPosition, offset: Int) -> UITextRange? {
+            guard let newPosition = self.position(from: position, offset: offset) else { return nil }
+            return self.textRange(from: newPosition, to: position)
+        }
+        
+        var wordStartPosition: UITextPosition = self.beginningOfDocument
+        var wordEndPosition: UITextPosition = self.endOfDocument
+        
+        while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
+            if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") {
+                wordStartPosition = range.end
+                break
+            }
+            position = range.start
+        }
+        
+        position = pos
+        
+        while let range = getRange(from: position, offset: 1), let text = self.text(in: range), let scalar = text.unicodeScalars.last {
+            if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") {
+                if let pos = self.position(from: range.end, offset: -1) {
+                    wordEndPosition = pos
+                }
+                break
+            }
+            position = range.end
+        }
+        
+        return self.textRange(from: wordStartPosition, to: wordEndPosition)
+    }
+    
+    public func leadingText(from pos: UITextPosition) -> [String]? {
+        var position = pos
+        func getRange(from position: UITextPosition, offset: Int) -> UITextRange? {
+            guard let newPosition = self.position(from: position, offset: offset) else { return nil }
+            return self.textRange(from: newPosition, to: position)
+        }
+        
+        var wordStartPosition: UITextPosition = self.beginningOfDocument
+        
+        var waitUntilWeFind: [String] = []
+//        guard var newEnd = self.position(from: pos, offset: -1) else {
+//            return nil
+//        }
+        var newEnd = pos
+        var allowSpace = false
+        var allowNewline = false
+        var texts: [String] = []
+        while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
+            if allowSpace && text == " " {
+            } else if allowNewline && text == "\n" {
+            } else if text == ")" {
+                waitUntilWeFind.append("(")
+            } else if text == "]" {
+                waitUntilWeFind.append("[")
+            } else if text == "}" {
+                waitUntilWeFind.append("{")
+            } else if text == "\"" && waitUntilWeFind.last != "\"" {
+                waitUntilWeFind.append("\"")
+            } else if let tryToFind = waitUntilWeFind.last {
+                if text == tryToFind {
+                    waitUntilWeFind = waitUntilWeFind.dropLast()
+                    if let range = self.textRange(from: range.start, to: newEnd) {
+                        if let nText = self.text(in: range) {
+                            texts.append(nText)
+                        }
+                    }
+                    newEnd = range.start
+                    if text == "{" {
+                        allowSpace = true
+                        allowNewline = true
+                    } else if text == "(" {
+                        allowSpace = true
+                        allowNewline = false
+                    } else {
+                        allowSpace = false
+                        allowNewline = false
+                    }
+                }
+            } else if text.contains("(") || text.contains("[") || text.contains("{") {
+                texts.append(text)
+                newEnd = range.start
+            } else if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") && !text.contains(".") && !text.contains("?") && !text.contains("\\") {
+                wordStartPosition = range.end
+                if let range = self.textRange(from: range.end, to: newEnd) {
+                    if let nText = self.text(in: range) {
+                        texts.append(nText)
+                    }
+                }
+                break
+            } else {
+                allowSpace = false
+                allowNewline = false
+            }
+            position = range.start
+        }
+        
+        position = pos
+        if wordStartPosition == self.beginningOfDocument {
+            return nil
+        }
+        return texts.reversed()
     }
 }
