@@ -247,10 +247,9 @@ public class FireflyTextView: UITextView {
         return self.text(in: wordRange) ?? ""
     }
     
-    public func currentWord2() -> String {
-        guard let start = self.selectedTextRange?.start else { return "" }
-        guard let wordRange = currentWordRange2(from: start) else { return "" }
-        
-        return self.text(in: wordRange) ?? ""
+    public func currentWord2() -> (UITextRange, String)? {
+        guard let start = self.selectedTextRange?.start else { return nil }
+        guard let wordRange = currentWordRange2(from: start) else { return nil }
+        return (wordRange, text(in: wordRange) ?? "")
     }
 }

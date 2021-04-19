@@ -21,8 +21,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     let getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)?
     
     let getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)?
+    let getReplaceRangeWithText: ((@escaping ((UITextRange, String)) -> Void) -> Void)?
     
-    let currentWord: Binding<String?>?
+    let currentWord: Binding<(UITextRange, String)?>?
     let selectedTextRange: Binding<UITextRange?>?
     
     let returnKeyType: UIReturnKeyType?
@@ -47,9 +48,10 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)? = nil,
         
         getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)? = nil,
+        getReplaceRangeWithText: ((@escaping ((UITextRange, String)) -> Void) -> Void)? = nil,
         
         selectedTextRange: Binding<UITextRange?>? = nil,
-        currentWord: Binding<String?>? = nil,
+        currentWord: Binding<(UITextRange, String)?>? = nil,
         
         returnKeyType: UIReturnKeyType? = nil,
         handleReturnKey: (() -> Bool)? = nil,
@@ -70,7 +72,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         self.cursorPosition = cursorPosition
         self.implementUIKeyCommands = implementUIKeyCommands
         self.getMoveCursorFunction = getMoveCursorFunction
+        
         self.getScrollToCursorPositionFunction = getScrollToCursorPositionFunction
+        self.getReplaceRangeWithText = getReplaceRangeWithText
         
         self.selectedTextRange = selectedTextRange
         self.currentWord = currentWord
@@ -97,6 +101,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         context.coordinator.wrappedView = wrappedView
         context.coordinator.wrappedView.allowOverscrollingOnBottom()
         context.coordinator.wrappedView.text = text
+        context.coordinator.wrappedView.setPlaceholdersAllowed(bool: true)
         context.coordinator.wrappedView.setFont(font: fontName)
         context.coordinator.wrappedView.setTheme(name: theme)
         context.coordinator.wrappedView.setLanguage(nLanguage: language)
@@ -108,6 +113,12 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         }
         if let getScrollToCursorPositionFunction = getScrollToCursorPositionFunction {
             getScrollToCursorPositionFunction(context.coordinator.wrappedView.textView.scrollToCursorPosition)
+        }
+        if let getReplaceRangeWithText = getReplaceRangeWithText {
+            getReplaceRangeWithText({ args in
+                context.coordinator.wrappedView.textView.replace(args.0, withText: args.1)
+                context.coordinator.wrappedView.forceHighlight()
+            })
         }
         return wrappedView
     }
@@ -148,7 +159,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         public func didClickLink(_ link: URL) { }
         public var handleReturnKey: (() -> Bool)?
         public var onSelectedTextRange: ((UITextRange?) -> Void)?
-        public var onCurrentWord: ((String?) -> Void)?
+        public var onCurrentWord: (((UITextRange, String)?) -> Void)?
         
         let parent: FireflySyntaxEditor
         var wrappedView: FireflySyntaxView!
