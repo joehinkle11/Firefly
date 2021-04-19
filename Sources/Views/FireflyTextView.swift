@@ -8,6 +8,9 @@
 import UIKit
 
 public class FireflyTextView: UITextView {
+    /// used to keep track if text changes or not
+    internal var lastTextHashOnSelectionChange: Int = 0
+    
     var gutterWidth: CGFloat = 20 {
         didSet {
             textContainerInset.left = gutterWidth
@@ -26,6 +29,21 @@ public class FireflyTextView: UITextView {
             return nil
         }
     }
+    
+    internal var scrollToCursorPositionWasCalled = false
+    /// put the caret to the center of the scroll view (by scrolling the view)
+    public func scrollToCursorPosition() {
+        guard let caret = cursorPosition() else {
+            return
+        }
+        let desiredY = caret.origin.y - self.bounds.height * 0.25
+        if desiredY > self.contentOffset.y {
+            Dispatch.main {
+                self.scrollToCursorPositionWasCalled = true
+                self.setContentOffset(.init(x: self.contentOffset.x, y: desiredY), animated: false)
+            }
+        }
+     }
     
     /// directionGoingRight: true = right, false = left
     func getNextRange(x: Int, y: Int, mode: Int, directionGoingRight: Bool) -> UITextRange? {

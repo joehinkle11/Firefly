@@ -241,8 +241,22 @@ public class FireflySyntaxView: UIView {
     /// helps update the inset for the allowOverscrolling setting
     public override func layoutSubviews() {
         super.layoutSubviews()
+        updateOverscrolling(isSelected: nil)
+    }
+    
+    /// is the user is editing the view with the keyboard
+    private var isSelected = false
+    /// update overscrolling bottom space
+    internal func updateOverscrolling(isSelected: Bool?) {
+        if let isSelected = isSelected {
+            self.isSelected = isSelected
+        }
         if allowOverscrolling {
-            textView.textContainerInset.bottom = self.bounds.height * 0.5
+            if isSelected ?? self.isSelected {
+                textView.textContainerInset.bottom = self.bounds.height - (self.textView.font?.lineHeight ?? 0)
+            } else {
+                textView.textContainerInset.bottom = self.bounds.height * 0.5
+            }
         }
     }
     

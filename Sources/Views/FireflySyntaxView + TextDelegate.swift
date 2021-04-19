@@ -160,6 +160,10 @@ extension FireflySyntaxView: UITextViewDelegate {
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateCursorPosition()
+        if let scrollViewDidScroll = delegate?.scrollViewDidScroll {
+            scrollViewDidScroll(scrollView, textView.scrollToCursorPositionWasCalled)
+            textView.scrollToCursorPositionWasCalled = false
+        }
     }
     
     public func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
@@ -196,8 +200,17 @@ extension FireflySyntaxView: UITextViewDelegate {
     public func textViewDidChangeSelection(_ textView: UITextView) {
         updateCursorPosition()
         if let didChangeSelectedRange = delegate?.didChangeSelectedRange {
-            guard let tView = textView as? FireflyTextView  else { return }
+            guard let tView = textView as? FireflyTextView else { return }
             didChangeSelectedRange(tView, self.textView.selectedRange)
+        }
+        if let didChangeSelectedRangeWithoutTextChange = delegate?.didChangeSelectedRangeWithoutTextChange {
+            guard let tView = textView as? FireflyTextView else { return }
+            let textHash = tView.text.hashValue
+            if tView.lastTextHashOnSelectionChange == textHash {
+                didChangeSelectedRangeWithoutTextChange(tView, self.textView.selectedRange)
+            } else {
+                tView.lastTextHashOnSelectionChange = textHash
+            }
         }
         if let onCurrentWord = delegate?.onCurrentWord {
             onCurrentWord(self.textView.currentWord2())
@@ -205,13 +218,15 @@ extension FireflySyntaxView: UITextViewDelegate {
     }
     
     public func textViewDidBeginEditing(_ textView: UITextView) {
-        guard let tView = textView as? FireflyTextView  else { return }
+        guard let tView = textView as? FireflyTextView else { return }
         delegate?.textViewDidBeginEditing(tView)
+        updateOverscrolling(isSelected: true)
     }
     
     public func textViewDidEndEditing(_ textView: UITextView) {
-        guard let tView = textView as? FireflyTextView  else { return }
+        guard let tView = textView as? FireflyTextView else { return }
         delegate?.textViewDidEndEditing(tView)
+        updateOverscrolling(isSelected: false)
     }
 
     func updateSelectedRange(_ range: NSRange) {
@@ -221,7 +236,7 @@ extension FireflySyntaxView: UITextViewDelegate {
     }
     
     public func textViewDidChange(_ textView: UITextView) {
-        guard let tView = textView as? FireflyTextView  else { return }
+        guard let tView = textView as? FireflyTextView else { return }
         if updateGutterNow {
             updateGutterWidth()
         }

@@ -20,6 +20,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     let implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)?
     let getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)?
     
+    let getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)?
+    
     let currentWord: Binding<String?>?
     let selectedTextRange: Binding<UITextRange?>?
     
@@ -30,16 +32,21 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     var theme: String
     var fontName: String
 
-    var didChangeText: (FireflySyntaxEditor) -> Void
+    var didChangeText: (FireflyTextView) -> Void
     var didChangeSelectedRange: (FireflySyntaxEditor, NSRange) -> Void
     var textViewDidBeginEditing: (FireflyTextView) -> Void
     var textViewDidEndEditing: (FireflyTextView) -> Void
+    
+    let scrollViewDidScroll: ((_ scrollView: UIScrollView, _ scrollToCursorPositionWasCalled: Bool) -> Void)?
+    let didChangeSelectedRangeWithoutTextChange: ((FireflySyntaxEditor, NSRange) -> Void)?
 
     public init(
         text: Binding<String>,
         cursorPosition: Binding<CGRect?>? = nil,
         implementUIKeyCommands: (keyCommands: (Selector) -> [UIKeyCommand]?, receiver: (UIKeyCommand) -> Void)? = nil,
         getMoveCursorFunction: ((@escaping ((Int, Int, Int, Bool, Bool)) -> Void) -> Void)? = nil,
+        
+        getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)? = nil,
         
         selectedTextRange: Binding<UITextRange?>? = nil,
         currentWord: Binding<String?>? = nil,
@@ -50,16 +57,20 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         language: String,
         theme: String,
         fontName: String,
-        didChangeText: @escaping (FireflySyntaxEditor) -> Void,
+        didChangeText: @escaping (FireflyTextView) -> Void,
         didChangeSelectedRange: @escaping (FireflySyntaxEditor, NSRange) -> Void,
         textViewDidBeginEditing: @escaping (FireflyTextView) -> Void,
-        textViewDidEndEditing: @escaping (FireflyTextView) -> Void
+        textViewDidEndEditing: @escaping (FireflyTextView) -> Void,
+        
+        scrollViewDidScroll: ((_ scrollView: UIScrollView, _ scrollToCursorPositionWasCalled: Bool) -> Void)? = nil,
+        didChangeSelectedRangeWithoutTextChange: ((FireflySyntaxEditor, NSRange) -> Void)? = nil
     ) {
         self._text = text
         
         self.cursorPosition = cursorPosition
         self.implementUIKeyCommands = implementUIKeyCommands
         self.getMoveCursorFunction = getMoveCursorFunction
+        self.getScrollToCursorPositionFunction = getScrollToCursorPositionFunction
         
         self.selectedTextRange = selectedTextRange
         self.currentWord = currentWord
@@ -75,6 +86,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         self.didChangeSelectedRange = didChangeSelectedRange
         self.textViewDidBeginEditing = textViewDidBeginEditing
         self.textViewDidEndEditing = textViewDidEndEditing
+        
+        self.scrollViewDidScroll = scrollViewDidScroll
+        self.didChangeSelectedRangeWithoutTextChange = didChangeSelectedRangeWithoutTextChange
     }
 
     public func makeUIView(context: Context) -> FireflySyntaxView {
@@ -91,6 +105,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         }
         if let getMoveCursorFunction = getMoveCursorFunction {
             getMoveCursorFunction(context.coordinator.wrappedView.textView.moveCursor(change:))
+        }
+        if let getScrollToCursorPositionFunction = getScrollToCursorPositionFunction {
+            getScrollToCursorPositionFunction(context.coordinator.wrappedView.textView.scrollToCursorPosition)
         }
         return wrappedView
     }
@@ -116,8 +133,13 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     }
      
     public class Coordinator: FireflyDelegate {
+        public func didClickLink(_ link: String) {
+            
+        }
+        
         
         public var cursorPositionChange: ((CGRect?) -> Void)?
+        public var scrollViewDidScroll: ((_ scrollView: UIScrollView, _ scrollToCursorPositionWasCalled: Bool) -> Void)?
         public var implementUIKeyCommands: (
             keyCommands: (Selector) -> [UIKeyCommand]?,
             receiver: (_ sender: UIKeyCommand) -> Void
@@ -144,6 +166,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             if let handleReturnKey = parent.handleReturnKey {
                 self.handleReturnKey = handleReturnKey
             }
+            if let scrollViewDidScroll = parent.scrollViewDidScroll {
+                self.scrollViewDidScroll = scrollViewDidScroll
+            }
             if let selectedTextRange = parent.selectedTextRange {
                 self.onSelectedTextRange = {
                     selectedTextRange.wrappedValue = $0
@@ -156,15 +181,19 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             }
         }
         
-        public func didChangeText(_ syntaxTextView: FireflyTextView) {
+        public func didChangeText(_ fireflyTextView: FireflyTextView) {
             Dispatch.main {
-                self.parent.text = syntaxTextView.text
+                self.parent.text = fireflyTextView.text
             }
-            parent.didChangeText(parent)
+            parent.didChangeText(fireflyTextView)
         }
         
         public func didChangeSelectedRange(_ syntaxTextView: FireflyTextView, selectedRange: NSRange) {
             parent.didChangeSelectedRange(parent, selectedRange)
+        }
+        
+        public func didChangeSelectedRangeWithoutTextChange(_ syntaxTextView: FireflyTextView, selectedRange: NSRange) {
+            parent.didChangeSelectedRangeWithoutTextChange?(parent, selectedRange)
         }
         
         public func textViewDidBeginEditing(_ textView: FireflyTextView) {
