@@ -163,13 +163,13 @@ extension SyntaxAttributedString {
                 })
             }
             //            }
-            #if DEBUG
-            let end = DispatchTime.now()
-            
-            let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
-            let timeInterval = Double(nanoTime) / 1_000_000_000
-            debugPrint("Highlighting range: \(range) took \(timeInterval)")
-            #endif
+//            #if DEBUG
+//            let end = DispatchTime.now()
+//            
+//            let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
+//            let timeInterval = Double(nanoTime) / 1_000_000_000
+//            debugPrint("Highlighting range: \(range) took \(timeInterval)")
+//            #endif
         } else {
             debugPrint("Outside the String Length")
         }

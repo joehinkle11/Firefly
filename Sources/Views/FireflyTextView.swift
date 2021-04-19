@@ -36,7 +36,7 @@ public class FireflyTextView: UITextView {
         guard let caret = cursorPosition() else {
             return
         }
-        let desiredY = caret.origin.y - self.bounds.height * 0.25
+        let desiredY = max(caret.origin.y - self.bounds.height + 20, min(caret.origin.y - 20, self.contentOffset.y - 0.01))
         if desiredY > self.contentOffset.y {
             Dispatch.main {
                 self.scrollToCursorPositionWasCalled = true
