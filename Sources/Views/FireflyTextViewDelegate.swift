@@ -37,4 +37,5 @@ public protocol FireflyDelegate: AnyObject {
     
     func didClickLink(_ link: String)
 
+    var onHardKeyboardUseChange: ((_ isUsingHardKeyboard: Bool) -> Void)? { get }
 }

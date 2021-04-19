@@ -23,6 +23,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     let getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)?
     let getReplaceRangeWithText: ((@escaping ((UITextRange, String)) -> Void) -> Void)?
     
+    let isUsingHardKeyboard: Binding<Bool>?
+    
     let currentWord: Binding<(UITextRange, String)?>?
     let selectedTextRange: Binding<UITextRange?>?
     
@@ -50,6 +52,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         getScrollToCursorPositionFunction: ((@escaping (()) -> Void) -> Void)? = nil,
         getReplaceRangeWithText: ((@escaping ((UITextRange, String)) -> Void) -> Void)? = nil,
         
+        isUsingHardKeyboard: Binding<Bool>? = nil,
+        
         selectedTextRange: Binding<UITextRange?>? = nil,
         currentWord: Binding<(UITextRange, String)?>? = nil,
         
@@ -75,6 +79,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         
         self.getScrollToCursorPositionFunction = getScrollToCursorPositionFunction
         self.getReplaceRangeWithText = getReplaceRangeWithText
+        
+        self.isUsingHardKeyboard = isUsingHardKeyboard
         
         self.selectedTextRange = selectedTextRange
         self.currentWord = currentWord
@@ -105,6 +111,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         context.coordinator.wrappedView.setFont(font: fontName)
         context.coordinator.wrappedView.setTheme(name: theme)
         context.coordinator.wrappedView.setLanguage(nLanguage: language)
+        context.coordinator.wrappedView.setupNotifs() // needed for isUsingHardKeyboard below
         if let returnKeyType = returnKeyType {
             context.coordinator.wrappedView.textView.returnKeyType = returnKeyType
         }
@@ -161,6 +168,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         public var onSelectedTextRange: ((UITextRange?) -> Void)?
         public var onCurrentWord: (((UITextRange, String)?) -> Void)?
         
+        public var onHardKeyboardUseChange: ((_ isUsingHardKeyboard: Bool) -> Void)?
+        
         let parent: FireflySyntaxEditor
         var wrappedView: FireflySyntaxView!
         
@@ -188,6 +197,11 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             if let currentWord = parent.currentWord {
                 self.onCurrentWord = {
                     currentWord.wrappedValue = $0
+                }
+            }
+            if let isUsingHardKeyboard = parent.isUsingHardKeyboard {
+                self.onHardKeyboardUseChange = {
+                    isUsingHardKeyboard.wrappedValue = $0
                 }
             }
         }

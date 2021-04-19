@@ -181,12 +181,16 @@ public class FireflySyntaxView: UIView {
     
     /// Sets up keyboard movement notifications
     func setupNotifs() {
-        if shouldOffsetKeyboard {
+        // needed to be commented out for shouldShowExtendedVirtualKeyboard
+//        if shouldOffsetKeyboard {
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        }
+//        }
     }
+    
+    
+    internal var isUsingHardKeyboard = false
     
     /// This detects keyboards height and adjusts the view to account for the keyboard in the way.
     @objc func adjustForKeyboard(notification: Notification) {
@@ -207,6 +211,26 @@ public class FireflySyntaxView: UIView {
             let selectedRange = textView.selectedRange
             textView.scrollRangeToVisible(selectedRange)
         }
+        
+        // for hard keyboard detection
+//        if notification.name != UIResponder.keyboardDidShowNotification {
+            guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+            let keyboardScreenEndFrame = keyboardValue.cgRectValue
+            let keyboardViewEndFrame = self.convert(keyboardScreenEndFrame, from: self.window)
+            if keyboardViewEndFrame.height > 100 {
+                // soft keyboard
+                if isUsingHardKeyboard == true {
+                    isUsingHardKeyboard = false
+                    delegate?.onHardKeyboardUseChange?(isUsingHardKeyboard)
+                }
+            } else {
+                // hard keyboard
+                if isUsingHardKeyboard == false {
+                    isUsingHardKeyboard = true
+                    delegate?.onHardKeyboardUseChange?(isUsingHardKeyboard)
+                }
+            }
+//        }
     }
     
     /// Force highlights the current range
