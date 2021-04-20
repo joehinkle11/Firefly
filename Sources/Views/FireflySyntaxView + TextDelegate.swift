@@ -30,6 +30,19 @@ extension FireflySyntaxView: UITextViewDelegate {
             }
         }
         
+        if text == "\"",
+           let nextCharStartPos = textView.position(from: textView.beginningOfDocument, offset: range.upperBound),
+           let nextCharEndPos = textView.position(from: textView.beginningOfDocument, offset: range.upperBound + 1),
+           let textRange = textView.textRange(from: nextCharStartPos, to: nextCharEndPos),
+           let nextCharacter = textView.text(in: textRange),
+           nextCharacter == "\"" {
+            if let newRangeToSelect = textView.textRange(from: nextCharEndPos, to: nextCharEndPos) {
+                self.textView.selectedTextRange = newRangeToSelect
+                lastChar = nil
+                return false
+            }
+        }
+        
         if placeholdersAllowed {
             //There is a bug here that when a multi-line string that is larger than the visible area is present, it will be partially highlighted because the ranges get messed up.
             let inside = textStorage.insidePlaceholder(cursorRange: selectedRange)
@@ -88,7 +101,7 @@ extension FireflySyntaxView: UITextViewDelegate {
                 textStorage.highlight(getVisibleRange(), cursorRange: selectedRange)
                 
                 delegate?.didChangeText(tView)
-
+                
                 return false
             } else if lastChar == "\"" && text != "\"" && (tView.currentWord() != "\"\"") {
                 insertingText += "\""

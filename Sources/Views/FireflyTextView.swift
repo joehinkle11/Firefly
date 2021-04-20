@@ -316,6 +316,7 @@ public class FireflyTextView: UITextView {
         var allowSpace = false
         var allowNewline = false
         var texts: [String] = []
+        var hasFoundALetterOrSomething = false
         while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
             if allowSpace && text == " " {
             } else if allowNewline && text == "\n" {
@@ -350,6 +351,14 @@ public class FireflyTextView: UITextView {
             } else if text.contains("(") || text.contains("[") || text.contains("{") {
                 texts.append(text)
                 newEnd = range.start
+            } else if hasFoundALetterOrSomething && text.contains(".") {
+                if let range = self.textRange(from: range.start, to: newEnd) {
+                    if let nText = self.text(in: range) {
+                        texts.append(nText)
+                    }
+                }
+                allowSpace = true
+                allowNewline = true
             } else if !CharacterSet.alphanumerics.contains(scalar) && !text.contains("_") && !text.contains(".") && !text.contains("?") && !text.contains("\\") {
                 wordStartPosition = range.end
                 if let range = self.textRange(from: range.end, to: newEnd) {
@@ -359,8 +368,14 @@ public class FireflyTextView: UITextView {
                 }
                 break
             } else {
-                allowSpace = false
-                allowNewline = false
+                hasFoundALetterOrSomething = true
+                if text.contains(".") {
+                    allowSpace = true
+                    allowNewline = true
+                } else {
+                    allowSpace = false
+                    allowNewline = false
+                }
             }
             position = range.start
         }

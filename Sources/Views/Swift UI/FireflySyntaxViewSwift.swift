@@ -133,6 +133,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         if let getReplaceRangeWithText = getReplaceRangeWithText {
             getReplaceRangeWithText({ args in
                 context.coordinator.wrappedView.textView.replace(args.0, withText: args.1)
+                context.coordinator.wrappedView.lastChar = nil
                 context.coordinator.wrappedView.forceHighlight()
             })
         }
