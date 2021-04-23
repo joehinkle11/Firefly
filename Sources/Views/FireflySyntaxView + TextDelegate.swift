@@ -23,6 +23,10 @@ extension FireflySyntaxView: UITextViewDelegate {
         let selectedRange = textView.selectedRange
         var insertingText = text
         
+        if text.count == 1 && text.first == lastChar {
+            lastChar = nil
+        }
+        
         if text == "\n", let handleReturnKeyFunction = delegate?.handleReturnKey {
             // if handleReturnKey returns true, it means they will handle the event
             if handleReturnKeyFunction() {
@@ -47,6 +51,8 @@ extension FireflySyntaxView: UITextViewDelegate {
             //There is a bug here that when a multi-line string that is larger than the visible area is present, it will be partially highlighted because the ranges get messed up.
             let inside = textStorage.insidePlaceholder(cursorRange: selectedRange)
             if inside.0 {
+                lastChar = nil
+                
                 if let token = inside.1 {
                     let fullRange = NSRange(location: 0, length: self.text.utf8.count)
                     if token.range.upperBound < fullRange.upperBound {
@@ -226,6 +232,7 @@ extension FireflySyntaxView: UITextViewDelegate {
             guard let tView = textView as? FireflyTextView else { return }
             let textHash = tView.text.hashValue
             if tView.lastTextHashOnSelectionChange == textHash {
+                self.lastChar = nil
                 didChangeSelectedRangeWithoutTextChange(tView, self.textView.selectedRange)
             } else {
                 tView.lastTextHashOnSelectionChange = textHash

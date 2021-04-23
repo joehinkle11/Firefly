@@ -318,7 +318,7 @@ public class FireflyTextView: UITextView {
         var texts: [String] = []
         var hasFoundALetterOrSomething = false
         while let range = getRange(from: position, offset: -1), let text = self.text(in: range), let scalar = text.unicodeScalars.first {
-            if allowSpace && text == " " {
+            if allowSpace && (text == " " || text == "\t") {
             } else if allowNewline && text == "\n" {
             } else if text == ")" {
                 waitUntilWeFind.append("(")
