@@ -24,7 +24,7 @@ public class Syntax {
     var definitions: [Definition] = []
     var theme: Theme = Theme(defaultFontColor: UIColor.black, backgroundColor: UIColor.white, currentLine: UIColor.clear, selection: UIColor.blue, cursor: UIColor.blue, colors: [:], font: UIFont.systemFont(ofSize: UIFont.systemFontSize), style: .light, lineNumber: UIColor.white, lineNumber_Active: UIColor.white)
     
-    init(language: String, theme: String, font: String) {
+    public init(language: String, theme: String, font: String) {
         currentLanguage = language
         currentTheme = theme
         setFont(to: font)
@@ -78,6 +78,34 @@ public class Syntax {
             
             self.theme = Theme(defaultFontColor: defaultColor, backgroundColor: backgroundColor, currentLine: currentLineColor, selection: selectionColor, cursor: cursorColor, colors: colors, font: currentFont, style: style, lineNumber: lineNumber, lineNumber_Active: lineNumber_Active)
         }
+    }
+    
+    public static func getTheme(name: String, font: UIFont) -> Theme? {
+        if let theme = themes[name] {
+            let defaultColor = UIColor(hex: (theme["default"] as? String) ?? "#000000")
+            let backgroundColor = UIColor(hex: (theme["background"] as? String) ?? "#000000")
+            
+            let currentLineColor = UIColor(hex: (theme["currentLine"] as? String) ?? "#000000")
+            let selectionColor = UIColor(hex: (theme["selection"] as? String) ?? "#000000")
+            let cursorColor = UIColor(hex: (theme["cursor"] as? String) ?? "#000000")
+            
+            let lineNumber = UIColor(hex: (theme["lineNumber"] as? String) ?? "#000000")
+            let lineNumber_Active = UIColor(hex: (theme["lineNumber-Active"] as? String) ?? "#000000")
+
+            let styleRaw = theme["style"] as? String
+            let style: Theme.UIStyle = styleRaw == "light" ? .light : .dark
+
+            var colors: [String: UIColor] = [:]
+            
+            if let cDefs = theme["definitions"] as? [String: String] {
+                for item in cDefs {
+                    colors.merge([item.key: UIColor(hex: (item.value))]) { (first, _) -> UIColor in return first }
+                }
+            }
+            
+            return Theme(defaultFontColor: defaultColor, backgroundColor: backgroundColor, currentLine: currentLineColor, selection: selectionColor, cursor: cursorColor, colors: colors, font: font, style: style, lineNumber: lineNumber, lineNumber_Active: lineNumber_Active)
+        }
+        return nil
     }
     /*
      "default": "#3c3836", // editor.foreground

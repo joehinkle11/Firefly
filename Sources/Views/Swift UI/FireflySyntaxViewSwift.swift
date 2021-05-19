@@ -45,6 +45,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
     
     let scrollViewDidScroll: ((_ scrollView: UIScrollView, _ scrollToCursorPositionWasCalled: Bool) -> Void)?
     let didChangeSelectedRangeWithoutTextChange: ((FireflySyntaxEditor, NSRange) -> Void)?
+    
+    let allowsEditing: Bool
 
     public init(
         text: Binding<String>,
@@ -75,7 +77,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         textViewDidEndEditing: @escaping (FireflyTextView) -> Void,
         
         scrollViewDidScroll: ((_ scrollView: UIScrollView, _ scrollToCursorPositionWasCalled: Bool) -> Void)? = nil,
-        didChangeSelectedRangeWithoutTextChange: ((FireflySyntaxEditor, NSRange) -> Void)? = nil
+        didChangeSelectedRangeWithoutTextChange: ((FireflySyntaxEditor, NSRange) -> Void)? = nil,
+        
+        allowsEditing: Bool = true
     ) {
         self._text = text
         
@@ -108,6 +112,8 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         
         self.scrollViewDidScroll = scrollViewDidScroll
         self.didChangeSelectedRangeWithoutTextChange = didChangeSelectedRangeWithoutTextChange
+        
+        self.allowsEditing = allowsEditing
     }
 
     public func makeUIView(context: Context) -> FireflySyntaxView {
@@ -138,6 +144,9 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
             })
         }
         context.coordinator.wrappedView.onNewText = onNewText
+        if !allowsEditing {
+            context.coordinator.wrappedView.textView.isEditable = false
+        }
         return wrappedView
     }
 

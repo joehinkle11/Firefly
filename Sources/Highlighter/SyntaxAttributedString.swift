@@ -18,7 +18,7 @@ public extension NSAttributedString.Key {
 
 open class SyntaxAttributedString : NSTextStorage {
     /// Internal Storage
-    let stringStorage = NSTextStorage()
+    public let stringStorage = NSTextStorage()
     var cachedTokens: [Token] = []
     
     /// Returns a standard String based on the current one.
@@ -356,7 +356,7 @@ extension SyntaxAttributedString {
         }
     }
     
-    func resetView() {
+    public func resetView() {
         cachedTokens.removeAll()
         self.setAttributes([NSAttributedString.Key.foregroundColor: syntax.theme.defaultFontColor, NSAttributedString.Key.font: syntax.currentFont], range: NSRange(location: 0, length: string.utf16.count))
     }
