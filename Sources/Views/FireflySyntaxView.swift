@@ -151,7 +151,7 @@ public class FireflySyntaxView: UIView {
         textView.isScrollEnabled = true
         textView.isUserInteractionEnabled = true
         textView.alwaysBounceVertical = true
-//        textView.becomeFirstResponder()
+        textView.becomeFirstResponder()
         textView.text = ""
         
         self.addSubview(textView)

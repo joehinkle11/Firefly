@@ -120,7 +120,7 @@ public struct FireflySyntaxEditor: UIViewRepresentable {
         let wrappedView = FireflySyntaxView()
         wrappedView.delegate = context.coordinator
         context.coordinator.wrappedView = wrappedView
-        context.coordinator.wrappedView.allowOverscrollingOnBottom()
+//        context.coordinator.wrappedView.allowOverscrollingOnBottom() // causes bug where text view always scrolls up when someone drags the cursor
         context.coordinator.wrappedView.text = text
         context.coordinator.wrappedView.setPlaceholdersAllowed(bool: true)
         context.coordinator.wrappedView.setFont(font: fontName)
