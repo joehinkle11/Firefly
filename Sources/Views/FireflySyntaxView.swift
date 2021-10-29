@@ -168,6 +168,7 @@ public class FireflySyntaxView: UIView {
         textView.autocorrectionType = .no
         textView.spellCheckingType = .no
         textView.smartQuotesType = .no
+        textView.smartDashesType = .no
         textView.smartInsertDeleteType = .no
         
         if self.textStorage.syntax.theme.style == .dark {

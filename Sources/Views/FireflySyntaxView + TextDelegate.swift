@@ -7,6 +7,10 @@
 
 import UIKit
 
+// replace tabs with 4 spaces
+/// todo: we should have this dymanically determined
+let tabChars = "    "
+
 extension FireflySyntaxView: UITextViewDelegate {
         
     //MARK: UITextViewDelegate
@@ -33,7 +37,6 @@ extension FireflySyntaxView: UITextViewDelegate {
                 return false
             }
         }
-        
         if text == "\"",
            let nextCharStartPos = textView.position(from: textView.beginningOfDocument, offset: range.upperBound),
            let nextCharEndPos = textView.position(from: textView.beginningOfDocument, offset: range.upperBound + 1),
@@ -96,10 +99,10 @@ extension FireflySyntaxView: UITextViewDelegate {
         if let lastChar = lastChar {
             let lastString: String = String(lastChar) + insertingText
             if lastString == "/*" {
-                insertingText += "\n\t\(newlineInsert)\n\(newlineInsert)*/"
+                insertingText += "\n\(tabChars)\(newlineInsert)\n\(newlineInsert)*/"
 
                 textView.textStorage.replaceCharacters(in: selectedRange, with: insertingText)
-                updateSelectedRange(NSRange(location: selectedRange.lowerBound + 3 + newlineInsert.count, length: 0))
+                updateSelectedRange(NSRange(location: selectedRange.lowerBound + 2 + tabChars.count + newlineInsert.count, length: 0))
                 textView.setNeedsDisplay()
                 self.lastChar = insertingText.last
                 shouldHighlightOnChange = false
@@ -127,9 +130,9 @@ extension FireflySyntaxView: UITextViewDelegate {
                 //Maybe change it so after you hit enter it adds the }
                 // Update on new line
                 if text == "\n" {
-                    insertingText += "\t\(newlineInsert)\n\(newlineInsert)}"
+                    insertingText += "\(tabChars)\(newlineInsert)\n\(newlineInsert)}"
                     textView.textStorage.replaceCharacters(in: selectedRange, with: insertingText)
-                    updateSelectedRange(NSRange(location: selectedRange.lowerBound + 2 + newlineInsert.count, length: 0))
+                    updateSelectedRange(NSRange(location: selectedRange.lowerBound + 1 + tabChars.count + newlineInsert.count, length: 0))
                 } else {
                     insertingText += "}"
                     textView.textStorage.replaceCharacters(in: selectedRange, with: insertingText)
@@ -180,6 +183,33 @@ extension FireflySyntaxView: UITextViewDelegate {
             return false
         }
         
+        if text == "\t" {
+            if abs(selectedRange.upperBound - selectedRange.lowerBound) == 0 {
+                // replace
+                textView.textStorage.replaceCharacters(in: selectedRange, with: tabChars)
+                updateSelectedRange(NSRange(location: selectedRange.lowerBound + tabChars.count, length: 0))
+                
+                textView.setNeedsDisplay()
+                updateGutterWidth()
+                shouldHighlightOnChange = false
+                textStorage.editingRange = selectedRange
+                textStorage.highlight(getVisibleRange(), cursorRange: selectedRange)
+                
+                delegate?.didChangeText(tView)
+            } else {
+                // insert at beginning of each line
+                /// todo
+//                textView.setNeedsDisplay()
+//                updateGutterWidth()
+//                shouldHighlightOnChange = false
+//                textStorage.editingRange = selectedRange
+//                textStorage.highlight(getVisibleRange(), cursorRange: selectedRange)
+//
+//                delegate?.didChangeText(tView)
+                return false
+            }
+            return false
+        }
         return true
     }
     
